@@ -37,5 +37,17 @@ body {
 @supports (-webkit-touch-callout: none) {
   html, body {
     height: -webkit-fill-available;
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #map {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
