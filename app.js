@@ -1,4 +1,4 @@
-
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const path = require('path');
@@ -18,11 +18,11 @@ const io = socketIO(server, {
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
-// Keep track of connected users
+
 const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
-  console.log('A user connected', socket.id);
+  
   connectedUsers.set(socket.id, Date.now());
   
   socket.on('location', ({lat, lon}) => {
@@ -47,7 +47,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port: ${PORT}`);
 });
 
-// Handle process termination gracefully
+
 process.on('SIGTERM', () => {
   server.close(() => {
     console.log('Server terminated');

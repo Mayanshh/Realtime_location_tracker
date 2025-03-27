@@ -3,7 +3,6 @@ const socket = io();
 let map;
 const markers = {};
 
-// Initialize map with better defaults
 function initMap() {
   map = L.map('map', {
     zoomControl: true,
@@ -19,7 +18,7 @@ function initMap() {
   }).addTo(map);
 }
 
-// Handle geolocation with better error handling
+
 function startLocationTracking() {
   if (!navigator.geolocation) {
     alert('Geolocation is not supported by your browser');
@@ -58,11 +57,11 @@ function startLocationTracking() {
   );
 }
 
-// Initialize map and start tracking
+
 initMap();
 startLocationTracking();
 
-// Socket event handlers
+
 socket.on('recieve-location', (data) => {
   const { id, lat, lon } = data;
   if (!markers[id]) {
@@ -80,7 +79,7 @@ socket.on('user-disconnect', (id) => {
   }
 });
 
-// Handle visibility changes
+
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
     map.invalidateSize();
