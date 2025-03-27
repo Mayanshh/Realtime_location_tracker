@@ -1,42 +1,88 @@
+
 const socket = io();
-if (navigator.geolocation) { navigator.geolocation.watchPosition(function(position){
-     let lat = position.coords.latitude;
-     let lon = position.coords.longitude;
-
-     socket.emit('location', {lat,lon});
-   }, (error) => {
-     
-     console.log(`An error occurred: ${error}`);
-     
-   },{
-     enableHighAccuracy: true,
-     timeout: 5000,
-     maximumAge: 0
-   });
-}
-else {
-   console.log('Geolocation is not supported by this browser.');
-}
-
+let map;
 const markers = {};
 
-const map = L.map('map').setView([0,0], 15);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+// Initialize map with better defaults
+function initMap() {
+  map = L.map('map', {
+    zoomControl: true,
+    doubleClickZoom: true,
+    boxZoom: true,
+    dragging: true,
+    touchZoom: true
+  }).setView([0, 0], 15);
 
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+}
+
+// Handle geolocation with better error handling
+function startLocationTracking() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser');
+    return;
+  }
+
+  const options = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
+  };
+
+  navigator.geolocation.watchPosition(
+    (position) => {
+      const { latitude: lat, longitude: lon } = position.coords;
+      socket.emit('location', { lat, lon });
+    },
+    (error) => {
+      let errorMessage;
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = "Location access denied";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = "Location information unavailable";
+          break;
+        case error.TIMEOUT:
+          errorMessage = "Location request timed out";
+          break;
+        default:
+          errorMessage = "An unknown error occurred";
+      }
+      console.error(`Geolocation error: ${errorMessage}`);
+    },
+    options
+  );
+}
+
+// Initialize map and start tracking
+initMap();
+startLocationTracking();
+
+// Socket event handlers
 socket.on('recieve-location', (data) => {
-    const { id, lat, lon } = data;
-    map.setView([lat, lon]);
-
-   if (markers[id]){
-     markers[id].setLatLng([lat, lon]);
-   } else {
-     markers[id] = L.marker([lat,lon]).addTo(map);
-   }
+  const { id, lat, lon } = data;
+  if (!markers[id]) {
+    markers[id] = L.marker([lat, lon]).addTo(map);
+  } else {
+    markers[id].setLatLng([lat, lon]);
+  }
+  map.setView([lat, lon]);
 });
 
 socket.on('user-disconnect', (id) => {
-  if (markers[id]){
+  if (markers[id]) {
     markers[id].remove();
     delete markers[id];
   }
-})
+});
+
+// Handle visibility changes
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    map.invalidateSize();
+  }
+});
