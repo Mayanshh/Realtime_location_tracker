@@ -12,11 +12,11 @@ This application allows users to share their real-time geographic location with 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<USERNAME>/<REPOSITORY_NAME>.git
+   git clone https://github.com/Mayanshh/Realtime_location_tracker
    ```
 2. Navigate to project repository:
 ```bash
-cd <REPOSITORY_NAME>
+cd Realtime_location_tracker
 ```
 3. Install the dependencies:
 ```bash
